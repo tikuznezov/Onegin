@@ -19,7 +19,7 @@ int main()
     PrintStrArray(a, count_of_lines, "original");
     PGREEN printf("count of lines = %zu;\n", count_of_lines); DEF_COL
 
-    Qsort(a, count_of_lines, sizeof(a[0]), CompareStrUp);
+    Qsort(a, count_of_lines, sizeof(a[0]), CompareStrDown);
     PrintStrArray(a, count_of_lines, "sorted");
     return 0;
 }
@@ -35,9 +35,9 @@ void PrintCharArray(char *array, size_t array_length)
 void PrintStr(const char *a)
 {
     PYELLOW
-    printf("\n--->  ");
+    printf("\n--->");
     size_t i = 0;
-    while (a[i] != '\0')
+    while ((a[i] != '\0') && (a[i] != '\n'))
         putc(a[i++], stdout);
     printf(":\n");
     DEF_COL
@@ -124,14 +124,29 @@ int PrintStrArray(char **array, size_t array_length,const char *comment)
 
 int CompareStrUp(const void *a, const void *b)
 {
-    // printf("called COMP\n");
-    // PrintStrArray((char **) a, 1);
-    // PrintStrArray((char **) b, 1);
-    int res = strcmp(*(const char **)a, *(const char **)b);
-    // printf("res = %d\n", res);
-    // printf(")\n");
-    // getchar();
-    return res;
+    assert(a);
+    assert(b);
+
+    char *pstr1 = *(char **)a;
+    char *pstr2 = *(char **)b;
+    unsigned int count_of_cmp = 0;
+
+    while ((count_of_cmp < MAX_STR_LENGTH) && (*pstr1 != '\n') && (*pstr1 != '\0'))
+    {
+        while (!isalpha(*pstr1) && (*pstr1 != '\n') && (*pstr1 != '\0'))
+            pstr1++;
+        while (!isalpha(*pstr2) && (*pstr2 != '\n') && (*pstr2 != '\0'))
+            pstr2++;
+
+        if (tolower(*pstr1) == tolower(*pstr2))
+        {
+            pstr1++;
+            pstr2++;
+            count_of_cmp++;
+        }
+        else break;
+    }
+    return tolower(*pstr1) - tolower(*pstr2);
 }
 
 int CompareInt(const void *a, const void *b)
@@ -156,33 +171,88 @@ int CompareInt(const void *a, const void *b)
     }
 }
 
-// int CompareStrDown(const void *a, const void *b)
-// {
-//     assert(a);
-//     assert(b);
-//     char *str1 = (char *)a;
-//     char *str2 = (char *)b;
-//     char *pstr1 = str1;
-//     char *pstr2 = str2;
-//
-//     while ((*pstr1 != '\0') && (*pstr1 != '\n') && (*pstr1 != EOF))
-//         pstr1++;
-//     while ((*pstr2 != '\0') && (*pstr2 != '\n') && (*pstr2 != EOF))
-//         pstr2++;
-//
-//     unsigned int count_of_cmp = 0;
-//
-//     while ((*pstr1 == *pstr2) && (count_of_cmp<MAX_STR_LENGTH))
-//     {
-//         pstr1--;
-//         pstr2--;
-//         count_of_cmp++;
-//         if ((*pstr1 == '\0') || (*pstr2 == '\0' ))
-//             break;
-//     }
-//
-//     if ((*pstr1 == '\0') && (*pstr2 == '\0'))
-//         return 0;
-//     else
-//         return *pstr1 - *(pstr2-1);
-// }
+int CompareStrDown(const void *a, const void *b)
+{
+    static int step = 0;
+    step++;
+    printf("Start comp -> ");
+    assert(a);
+    assert(b);
+
+    char *pstr1 = *(char **)a;
+    char *pstr2 = *(char **)b;
+    size_t count_of_cmp = 0;
+    size_t len1 = 0;
+    size_t len2 = 0;
+
+    if (*pstr1 == '\n' && *pstr2 == '\n')
+    {
+        // printf("end comp %6d\n", step);
+        return 0;
+    }
+    else if (*pstr1 == '\n')
+    {
+        // printf("end comp %6d\n", step);
+        return -1;
+    }
+    else if (*pstr2 == '\n')
+    {
+        // printf("end comp %6d\n", step);
+        return 1;
+    }
+
+    while ((*pstr1 != '\n') && (*pstr1 != '\0'))
+    {
+        pstr1++;
+        len1++;
+    }
+    while ((*pstr2 != '\n') && (*pstr2 != '\0'))
+    {
+        pstr2++;
+        len2++;
+    }
+
+    if (len1 > 0 && len2 > 0)
+    {
+        pstr1--;
+        pstr2--;
+        len1--;
+        len2--;
+    }
+
+
+    while ((len1 > 0) && (len2 > 0) && (*pstr1 != '\n') && (*pstr1 != '\0')&& (*pstr2 != '\n') && (*pstr2 != '\0'))
+    {
+        // if (len1 <= 0) printf("main -> pstr1 < 0\n");
+        // if (len2 <= 0) printf("main -> pstr2 < 0\n");
+
+        while (!isalpha(*pstr1) && (*pstr1 != '\n') && (*pstr1 != '\0') && (len1 > 0))
+        {
+            // if (len1 <= 0) printf("while1 -> pstr1 < 0\n");
+            // if (len2 <= 0) printf("while1 -> pstr2 < 0\n");
+            pstr1--;
+            len1--;
+        }
+
+        while (!isalpha(*pstr2) && (*pstr2 != '\n') && (*pstr2 != '\0') && (len2 > 0))
+        {
+            // if (len1 <= 0) printf("while2 -> pstr1 < 0\n");
+            // if (len2 <= 0) printf("while2 -> pstr2 < 0\n");
+            pstr2--;
+            len2--;
+        }
+
+        if ((tolower(*pstr1) == tolower(*pstr2)) && (len1 > 0) && (len2 > 0))
+        {
+            // if (len1 <= 0){printf("equal -> pstr1 < 0\n"); PrintStr(pstr1);}
+            // if (len2 <= 0){printf("equal -> pstr2 < 0\n"); PrintStr(pstr2);}
+            pstr1--;
+            pstr2--;
+            len1--;
+            len2--;
+        }
+        else break;
+    }
+    // printf("end comp %6d\n", step);
+    return tolower(*pstr1) - tolower(*pstr2);
+}
