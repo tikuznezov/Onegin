@@ -28,6 +28,7 @@ struct File
 };
 
 
+
 //! Задает красный цвет текста
 #define PRED printf("\x1b[31m");
 //! Задает синий цвет текста
@@ -44,28 +45,39 @@ struct File
 #define BLACKonWHITE printf("\x1b[30;47m");
 
 
-File ReadFromFile(char *file_name);
 
 // display strings array
-int PrintStrArray(char **array, size_t array_length,const char *comment);
-
-// sorting from a->z
-int CompareStrUp(const void *a, const void *b);
+int  PrintStrArray(char **array, size_t array_length,const char *comment);
 
 void PrintCharArray(char *array, size_t array_length);
 
 void PrintStr(const char *a);
 
-int CompareInt(const void *a, const void *b);
+int  CompareInt(const void *a, const void *b);
 
-int CompareStrDown(const void *a, const void *b);
+// sorting from a->z
+int  CompareStrUp(const void *a, const void *b);
 
-int RandComp(const void *a, const void *b);
+int  CompareStrDown(const void *a, const void *b);
 
-int IntCompUp(const void *a, const void *b);
+int  RandComp(const void *a, const void *b);
 
+int  IntCompUp(const void *a, const void *b);
+
+/// @brief Read file to buffer and get file info (struct File)
+/// @param file_name name of file
+/// @return buffer with file data, array with begin of file strings, other file info
+File ReadFromFile(char *file_name);
+
+/// @brief Get file size by system call
+/// @param file_name name of file
+/// @param statistics struct with file info
+/// @return enum TYPE_OF_ERROR (dev)
 int FileSize(char *file_name, struct stat *statistics);
 
+/// @brief Read file and record strings addresses to array
+/// @param file struct with file data
+/// @return enum TYPE_OF_ERROR (dev)
 int SepToStr(File *file);
 
 

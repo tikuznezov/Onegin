@@ -45,7 +45,6 @@ size_t Part (void *array, size_t array_length, size_t element_size, int (* Comp)
     return l;
 }
 
-
 void   Qsort(void *array, size_t array_length, size_t element_size, int (* Comp)(const void *a, const void *b))
 {
     assert(array);

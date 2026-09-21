@@ -1,6 +1,7 @@
 #include "onegin.h"
 #include "Qsort.cpp"
 
+// TODO коды ошибок
 
 int main(int argc, char *argv[]) 
 {
@@ -17,28 +18,23 @@ int main(int argc, char *argv[])
     }
 
     File onegin = ReadFromFile(file_name);
+
+    // read data
     PGREEN printf("file reading completed\n"); DEF_COL
     PrintStrArray(onegin.str_pointers, onegin.str_count, "original");
     PGREEN printf("count of lines = %zu;\n\n", onegin.str_count); DEF_COL
 
-    // сортировка с начала
+    // sort by alphabet
     Qsort(onegin.str_pointers, onegin.str_count, sizeof(onegin.str_pointers[0]), CompareStrUp);
     PrintStrArray(onegin.str_pointers, onegin.str_count, "sorted UP");
 
-    // сортировка с конца
+    // reverse sort by alphabet
     qsort(onegin.str_pointers, onegin.str_count, sizeof(onegin.str_pointers[0]), CompareStrDown);
     PrintStrArray(onegin.str_pointers, onegin.str_count, "sorted DOWN");
 
-    // печать оригинала
+    // original
     Qsort(onegin.str_pointers, onegin.str_count, sizeof(onegin.str_pointers[0]), IntCompUp);
     PrintStrArray(onegin.str_pointers, onegin.str_count, "oroginal");
-
-    // Тут для проверки
-        // Qsort(onegin_text, onegin.str_count, sizeof(onegin_text[0]), RandComp);
-        // PrintStrArray(onegin_text, onegin.str_count, "Random");
-
-        // Qsort(onegin_text, onegin.str_count, sizeof(onegin_text[0]), CompareStrUp);
-        // PrintStrArray(onegin_text, onegin.str_count, "sorted UP");
 
     return 0;
 }
@@ -73,13 +69,6 @@ File ReadFromFile(char *file_name)
     // separate to single strings
     SepToStr(&file);
 
-    // TODO README
-
-    // PrintCharArray(buffer, buffer_size);
-
-    // COMP функ для чтения без разбиения на строчки возврат структуры с размером, указателем на буфер и массивом указателей на строки
-
-    // PrintStrArray(pointer_array, 4);
     return file;
 }
 
@@ -282,6 +271,7 @@ int FileSize(char *file_name, struct stat *statistics)
     return 0;
 }
 
+// COMP функ для чтения без разбиения на строчки возврат структуры с размером, указателем на буфер и массивом указателей на строки
 // COMP Function to separate file to strings
 int SepToStr(File *file)
 {
