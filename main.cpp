@@ -1,34 +1,45 @@
 #include "onegin.h"
-
 #include "Qsort.cpp"
-
-
-
-// TODO comparator
-// TODO qsort to strings
-// TODO read srt from file to dynamic memory
-// TODO display sorting and sorted strings
 
 
 int main() 
 {
-    char **a = NULL;
-    char file_name[100] = "ggd.txt";
-    size_t count_of_lines = ReadFromFile(&a, file_name);
-    PGREEN printf("file reading completed\n"); DEF_COL
-    PrintStrArray(a, count_of_lines, "original");
-    PGREEN printf("count of lines = %zu;\n", count_of_lines); DEF_COL
+    char **onegin_text = NULL;
+    char file_name[MAX_STR_LENGTH] = "test.txt";
 
-    Qsort(a, count_of_lines, sizeof(a[0]), CompareStrDown);
-    PrintStrArray(a, count_of_lines, "sorted");
+    File onegin = ReadFromFile(&onegin_text, file_name);
+    size_t count_of_lines = onegin.str_count;
+    PGREEN printf("file reading completed\n"); DEF_COL
+    PrintStrArray(onegin_text, count_of_lines, "original");
+    PGREEN printf("count of lines = %zu;\n\n", count_of_lines); DEF_COL
+
+    // сортировка с начала
+    Qsort(onegin_text, count_of_lines, sizeof(onegin_text[0]), CompareStrUp);
+    PrintStrArray(onegin_text, count_of_lines, "sorted UP");
+
+    // сортировка с конца
+    qsort(onegin_text, count_of_lines, sizeof(onegin_text[0]), CompareStrDown);
+    PrintStrArray(onegin_text, count_of_lines, "sorted DOWN");
+
+    // печать оригинала
+    Qsort(onegin_text, count_of_lines, sizeof(onegin_text[0]), IntCompUp);
+    PrintStrArray(onegin_text, count_of_lines, "oroginal");
+
+    // Тут для проверки
+        // Qsort(onegin_text, count_of_lines, sizeof(onegin_text[0]), RandComp);
+        // PrintStrArray(onegin_text, count_of_lines, "Random");
+
+        // Qsort(onegin_text, count_of_lines, sizeof(onegin_text[0]), CompareStrUp);
+        // PrintStrArray(onegin_text, count_of_lines, "sorted UP");
+
     return 0;
 }
 
 
-void PrintCharArray(char *array, size_t array_length)
+void PrintCharArray(char *a, size_t array_length)
 {
-    for (int i = 0; i < array_length; i++)
-        putc(array[i], stdout);
+    for (size_t i = 0; i < array_length; i++)
+        putc(a[i], stdout);
     printf("\n");
 }
 
@@ -43,61 +54,29 @@ void PrintStr(const char *a)
     DEF_COL
 }
 
-size_t ReadFromFile(char ***array, char *file_name)
+File ReadFromFile(char ***a, char *file_name)
 {
-    int file = open(file_name, O_RDONLY);
-    if (file == -1)
-    {
-        perror("Ошибка чтения файла"); // текстовое описание последней системной ошибки
-        return 1;
-    }
+    // create file struct
+    File file = {};
+    
+    // read file to struct
+    ReadFile(file_name, &file);
 
-    struct stat statistics = {};
-    if (stat(file_name, &statistics) == 0) {
-        printf("Размер файла: %ld байт\n", (long)statistics.st_size);
-    } else {
-        perror("Ошибка при вызове stat");
-        return 1;
-    }
+    // separate to single strings
+    SepToStr(&file);
 
-    char **pointer_array = (char **)calloc(POINTER_ARRAY_LENGTH, sizeof(char *));
+    // TODO README
 
-    printf("pointer array is initialized\n");
-
-    size_t count_of_read_lines = 0;
-
-    size_t buffer_size = (size_t)statistics.st_size;
-    printf("buffer size = %zu\n", buffer_size);
-
-    char *buffer = (char *)calloc(buffer_size + 1, 1);
-
-    int count_of_read_bytes = read(file, (void *)buffer, buffer_size);
     // PrintCharArray(buffer, buffer_size);
 
-    size_t current_buffer_index = 0;
-    size_t current_pointer_index = 0;
-
-    pointer_array[current_pointer_index++] = buffer;
-    count_of_read_lines++;
-
-    while ((current_buffer_index < buffer_size) && (current_pointer_index < POINTER_ARRAY_LENGTH))
-    {
-        if (buffer[current_buffer_index] == '\n')
-        {
-            count_of_read_lines++;
-            pointer_array[current_pointer_index++] = &buffer[++current_buffer_index];
-        }
-        else
-            current_buffer_index++;
-    }
-
+    // COMP функ для чтения без разбиения на строчки возврат структуры с размером, указателем на буфер и массивом указателей на строки
 
     // PrintStrArray(pointer_array, 4);
-    *array = pointer_array;
-    return count_of_read_lines;
+    *a = file.str_pointers;
+    return file;
 }
 
-int PrintStrArray(char **array, size_t array_length,const char *comment)
+int PrintStrArray(char **a, size_t array_length,const char *comment)
 {
     PrintStr(comment);
     PYELLOW printf("----------------------------------------------------------------\n"); DEF_COL
@@ -108,9 +87,9 @@ int PrintStrArray(char **array, size_t array_length,const char *comment)
         putc('"', stdout);
 
         size_t str_index = 0;
-        while ((array[i][str_index] != '\0') && (array[i][str_index] != '\n'))
+        while ((a[i][str_index] != '\0') && (a[i][str_index] != '\n'))
         {
-            putc(array[i][str_index], stdout);
+            putc(a[i][str_index], stdout);
             str_index++;
         }
 
@@ -127,8 +106,8 @@ int CompareStrUp(const void *a, const void *b)
     assert(a);
     assert(b);
 
-    char *pstr1 = *(char **)a;
-    char *pstr2 = *(char **)b;
+    const char *pstr1 = *(const char * const*)a;
+    const char *pstr2 = *(const char * const*)b;
     unsigned int count_of_cmp = 0;
 
     while ((count_of_cmp < MAX_STR_LENGTH) && (*pstr1 != '\n') && (*pstr1 != '\0'))
@@ -151,8 +130,8 @@ int CompareStrUp(const void *a, const void *b)
 
 int CompareInt(const void *a, const void *b)
 {
-    char *pstr1 = *(char **)a;
-    char *pstr2 = *(char **)b;
+    const char *pstr1 = *(const char * const*)a;
+    const char *pstr2 = *(const char * const*)b;
     printf("a = %c, b = %c\n", *pstr1, *pstr2);
 
     while ((*pstr1 == *pstr2) && (*pstr1 != '\n'))
@@ -173,15 +152,14 @@ int CompareInt(const void *a, const void *b)
 
 int CompareStrDown(const void *a, const void *b)
 {
-    static int step = 0;
-    step++;
-    printf("Start comp -> ");
+    // static int step = 0;
+    // step++;
+    // printf("Start comp -> ");
     assert(a);
     assert(b);
 
-    char *pstr1 = *(char **)a;
-    char *pstr2 = *(char **)b;
-    size_t count_of_cmp = 0;
+    const char *pstr1 = *(const char * const*)a;
+    const char *pstr2 = *(const char * const*)b;
     size_t len1 = 0;
     size_t len2 = 0;
 
@@ -255,4 +233,91 @@ int CompareStrDown(const void *a, const void *b)
     }
     // printf("end comp %6d\n", step);
     return tolower(*pstr1) - tolower(*pstr2);
+}
+
+int RandComp(const void *, const void *)
+{
+    srand((unsigned) time(NULL));
+    return ((int)(rand()) % 10) - 5;
+}
+
+int IntCompUp(const void *a, const void *b)
+{
+    return *(const int *)a - *(const int *)b;
+}
+
+// COMP Function to get file size
+int FileSize(char *file_name, struct stat *statistics)
+{
+    if (stat(file_name, statistics) == 0) 
+    {
+        printf("Размер файла: %ld байт\n", (long)statistics->st_size);
+    } 
+    else 
+    {
+        perror("Ошибка при вызове stat");
+        return 1;
+    }
+    return 0;
+}
+
+// COMP Function to separate file to strings
+File *SepToStr(File *file)
+{
+    // create strings addresses buffer
+    file->str_pointers = (char **)calloc(POINTER_ARRAY_LENGTH, sizeof(char *));
+    // printf("pointer a is initialized\n");
+
+    // separate to strings
+    size_t current_buffer_index = 0;
+    size_t current_pointer_index = 0;
+    file->str_count = 0;
+
+    // first string is begin of file
+    file->str_pointers[current_pointer_index++] = file->begin;
+    // go to next index
+    file->str_count++;
+
+    while ((current_buffer_index < file->size) && (current_pointer_index < POINTER_ARRAY_LENGTH))
+    {
+        if (file->begin[current_buffer_index] == '\n')
+        {
+            file->str_count++;
+            file->str_pointers[current_pointer_index++] = &(file->begin)[++current_buffer_index];
+        }
+        else
+            current_buffer_index++;
+    }
+
+    return file;
+}
+
+// COMP Function to read file to buffer
+int ReadFile(char *file_name, File *file)
+{
+    // read file and get descriptor
+    int fd = open(file_name, O_RDONLY);
+    if (fd == -1)
+    {
+        perror("Ошибка чтения файла"); // текстовое описание последней системной ошибки
+        return 1;
+    }
+
+    // get file size
+    struct stat statistics = {};
+    FileSize(file_name, &statistics);
+    file->size = (size_t)statistics.st_size;
+    // printf("buffer size = %zu\n", file.size);
+
+
+    // create text buffer
+    file->begin = (char *)calloc(file->size + 1, 1);
+
+    // read to text buffer
+    long count_of_read_bytes = read(fd, (void *)file->begin, file->size);
+    if (count_of_read_bytes == -1)
+        perror("Ошибка чтения файла\n");
+
+    close(fd);
+    return 0;
 }

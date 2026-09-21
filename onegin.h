@@ -15,9 +15,17 @@
 #include <ctype.h>
 
 
-const size_t POINTER_ARRAY_LENGTH = 400;
+const size_t POINTER_ARRAY_LENGTH = 8000;
 
 const size_t MAX_STR_LENGTH       = 100;
+
+struct File 
+{
+    size_t str_count;
+    size_t size;
+    char *begin;
+    char **str_pointers;
+};
 
 
 //! Задает красный цвет текста
@@ -35,8 +43,8 @@ const size_t MAX_STR_LENGTH       = 100;
 //! Задает черный текст на белом фоне
 #define BLACKonWHITE printf("\x1b[30;47m");
 
-// return count of read lines
-size_t ReadFromFile(char ***array, char *file_name);
+
+File ReadFromFile(char ***a, char *file_name);
 
 // display strings array
 int PrintStrArray(char **array, size_t array_length,const char *comment);
@@ -51,5 +59,20 @@ void PrintStr(const char *a);
 int CompareInt(const void *a, const void *b);
 
 int CompareStrDown(const void *a, const void *b);
+
+int RandComp(const void *a, const void *b);
+
+int IntCompUp(const void *a, const void *b);
+
+int FileSize(char *file_name, struct stat *statistics);
+
+File *SepToStr(File *file);
+
+
+/// @brief Function to read file to buffer
+/// @param file_name - name of read file
+/// @param file - struct to record read file 
+/// @return
+int ReadFile(char *file_name, File *file);
 
 #endif
