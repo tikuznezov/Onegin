@@ -2,35 +2,43 @@
 #include "Qsort.cpp"
 
 
-int main() 
+int main(int argc, char *argv[]) 
 {
-    char **onegin_text = NULL;
-    char file_name[MAX_STR_LENGTH] = "test.txt";
+    char file_name[MAX_STR_LENGTH] = "";
+    if (argc == 2)
+    {
+        strncpy(file_name, argv[1], MAX_STR_LENGTH-1);
+    }
+    else
+    {
+        printf("Input file name: ");
+        if (scanf("%s", file_name) != 1)
+            return 1;
+    }
 
-    File onegin = ReadFromFile(&onegin_text, file_name);
-    size_t count_of_lines = onegin.str_count;
+    File onegin = ReadFromFile(file_name);
     PGREEN printf("file reading completed\n"); DEF_COL
-    PrintStrArray(onegin_text, count_of_lines, "original");
-    PGREEN printf("count of lines = %zu;\n\n", count_of_lines); DEF_COL
+    PrintStrArray(onegin.str_pointers, onegin.str_count, "original");
+    PGREEN printf("count of lines = %zu;\n\n", onegin.str_count); DEF_COL
 
     // сортировка с начала
-    Qsort(onegin_text, count_of_lines, sizeof(onegin_text[0]), CompareStrUp);
-    PrintStrArray(onegin_text, count_of_lines, "sorted UP");
+    Qsort(onegin.str_pointers, onegin.str_count, sizeof(onegin.str_pointers[0]), CompareStrUp);
+    PrintStrArray(onegin.str_pointers, onegin.str_count, "sorted UP");
 
     // сортировка с конца
-    qsort(onegin_text, count_of_lines, sizeof(onegin_text[0]), CompareStrDown);
-    PrintStrArray(onegin_text, count_of_lines, "sorted DOWN");
+    qsort(onegin.str_pointers, onegin.str_count, sizeof(onegin.str_pointers[0]), CompareStrDown);
+    PrintStrArray(onegin.str_pointers, onegin.str_count, "sorted DOWN");
 
     // печать оригинала
-    Qsort(onegin_text, count_of_lines, sizeof(onegin_text[0]), IntCompUp);
-    PrintStrArray(onegin_text, count_of_lines, "oroginal");
+    Qsort(onegin.str_pointers, onegin.str_count, sizeof(onegin.str_pointers[0]), IntCompUp);
+    PrintStrArray(onegin.str_pointers, onegin.str_count, "oroginal");
 
     // Тут для проверки
-        // Qsort(onegin_text, count_of_lines, sizeof(onegin_text[0]), RandComp);
-        // PrintStrArray(onegin_text, count_of_lines, "Random");
+        // Qsort(onegin_text, onegin.str_count, sizeof(onegin_text[0]), RandComp);
+        // PrintStrArray(onegin_text, onegin.str_count, "Random");
 
-        // Qsort(onegin_text, count_of_lines, sizeof(onegin_text[0]), CompareStrUp);
-        // PrintStrArray(onegin_text, count_of_lines, "sorted UP");
+        // Qsort(onegin_text, onegin.str_count, sizeof(onegin_text[0]), CompareStrUp);
+        // PrintStrArray(onegin_text, onegin.str_count, "sorted UP");
 
     return 0;
 }
@@ -54,7 +62,7 @@ void PrintStr(const char *a)
     DEF_COL
 }
 
-File ReadFromFile(char ***a, char *file_name)
+File ReadFromFile(char *file_name)
 {
     // create file struct
     File file = {};
@@ -72,12 +80,14 @@ File ReadFromFile(char ***a, char *file_name)
     // COMP функ для чтения без разбиения на строчки возврат структуры с размером, указателем на буфер и массивом указателей на строки
 
     // PrintStrArray(pointer_array, 4);
-    *a = file.str_pointers;
     return file;
 }
 
 int PrintStrArray(char **a, size_t array_length,const char *comment)
 {
+    assert(a);
+    assert(comment);
+
     PrintStr(comment);
     PYELLOW printf("----------------------------------------------------------------\n"); DEF_COL
     for (size_t i = 0; i < array_length; i++)
@@ -130,6 +140,9 @@ int CompareStrUp(const void *a, const void *b)
 
 int CompareInt(const void *a, const void *b)
 {
+    assert(a);
+    assert(b);
+
     const char *pstr1 = *(const char * const*)a;
     const char *pstr2 = *(const char * const*)b;
     printf("a = %c, b = %c\n", *pstr1, *pstr2);
@@ -152,6 +165,9 @@ int CompareInt(const void *a, const void *b)
 
 int CompareStrDown(const void *a, const void *b)
 {
+    assert(a);
+    assert(b);
+
     // static int step = 0;
     // step++;
     // printf("Start comp -> ");
@@ -243,12 +259,17 @@ int RandComp(const void *, const void *)
 
 int IntCompUp(const void *a, const void *b)
 {
+    assert(a);
+    assert(b);
     return *(const int *)a - *(const int *)b;
 }
 
 // COMP Function to get file size
 int FileSize(char *file_name, struct stat *statistics)
 {
+    assert(file_name);
+    assert(statistics);
+
     if (stat(file_name, statistics) == 0) 
     {
         printf("Размер файла: %ld байт\n", (long)statistics->st_size);
@@ -256,16 +277,18 @@ int FileSize(char *file_name, struct stat *statistics)
     else 
     {
         perror("Ошибка при вызове stat");
-        return 1;
+        exit(1);
     }
     return 0;
 }
 
 // COMP Function to separate file to strings
-File *SepToStr(File *file)
+int SepToStr(File *file)
 {
+    assert(file);
     // create strings addresses buffer
     file->str_pointers = (char **)calloc(POINTER_ARRAY_LENGTH, sizeof(char *));
+    assert(file->str_pointers);
     // printf("pointer a is initialized\n");
 
     // separate to strings
@@ -289,18 +312,20 @@ File *SepToStr(File *file)
             current_buffer_index++;
     }
 
-    return file;
+    return 0;
 }
 
 // COMP Function to read file to buffer
 int ReadFile(char *file_name, File *file)
 {
+    assert(file_name);
+    assert(file);
     // read file and get descriptor
     int fd = open(file_name, O_RDONLY);
     if (fd == -1)
     {
-        perror("Ошибка чтения файла"); // текстовое описание последней системной ошибки
-        return 1;
+        perror("File reading error"); // текстовое описание последней системной ошибки
+        exit(1);
     }
 
     // get file size
@@ -312,11 +337,15 @@ int ReadFile(char *file_name, File *file)
 
     // create text buffer
     file->begin = (char *)calloc(file->size + 1, 1);
+    assert(file->begin);
 
     // read to text buffer
     long count_of_read_bytes = read(fd, (void *)file->begin, file->size);
     if (count_of_read_bytes == -1)
-        perror("Ошибка чтения файла\n");
+    {
+        perror("Ошибка чтения данных файла\n");
+        exit(1);
+    }
 
     close(fd);
     return 0;

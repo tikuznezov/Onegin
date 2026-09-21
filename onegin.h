@@ -44,7 +44,7 @@ struct File
 #define BLACKonWHITE printf("\x1b[30;47m");
 
 
-File ReadFromFile(char ***a, char *file_name);
+File ReadFromFile(char *file_name);
 
 // display strings array
 int PrintStrArray(char **array, size_t array_length,const char *comment);
@@ -66,7 +66,7 @@ int IntCompUp(const void *a, const void *b);
 
 int FileSize(char *file_name, struct stat *statistics);
 
-File *SepToStr(File *file);
+int SepToStr(File *file);
 
 
 /// @brief Function to read file to buffer
