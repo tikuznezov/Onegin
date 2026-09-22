@@ -6,7 +6,9 @@
 int main(int argc, char *argv[]) 
 {
     char file_name[MAX_STR_LENGTH] = "";
-    if (argc == 2)
+
+    // COMP
+    if (argc >= 2)
     {
         strncpy(file_name, argv[1], MAX_STR_LENGTH-1);
     }
@@ -20,9 +22,9 @@ int main(int argc, char *argv[])
     File onegin = ReadFromFile(file_name);
 
     // read data
-    PGREEN printf("file reading completed\n"); DEF_COL
-    PrintStrArray(onegin.str_pointers, onegin.str_count, "original");
-    PGREEN printf("count of lines = %zu;\n\n", onegin.str_count); DEF_COL
+    // PGREEN printf("file reading completed\n"); DEF_COL
+    // PrintStrArray(onegin.str_pointers, onegin.str_count, "original");
+    // PGREEN printf("count of lines = %zu;\n\n", onegin.str_count); DEF_COL
 
     // sort by alphabet
     Qsort(onegin.str_pointers, onegin.str_count, sizeof(onegin.str_pointers[0]), CompareStrUp);
@@ -62,7 +64,7 @@ File ReadFromFile(char *file_name)
 {
     // create file struct
     File file = {};
-    
+
     // read file to struct
     ReadFile(file_name, &file);
 
@@ -125,31 +127,6 @@ int CompareStrUp(const void *a, const void *b)
         else break;
     }
     return tolower(*pstr1) - tolower(*pstr2);
-}
-
-int CompareInt(const void *a, const void *b)
-{
-    assert(a);
-    assert(b);
-
-    const char *pstr1 = *(const char * const*)a;
-    const char *pstr2 = *(const char * const*)b;
-    printf("a = %c, b = %c\n", *pstr1, *pstr2);
-
-    while ((*pstr1 == *pstr2) && (*pstr1 != '\n'))
-    {
-        pstr1++;
-        pstr2++;
-    }
-
-    if ((*pstr1 == '\0') || (*pstr1 != '\n'))
-        return 0;
-    else
-    {
-        int res = *pstr1 - *(pstr2-1);
-        if (res > 0) return 1;
-        else return 0;
-    }
 }
 
 int CompareStrDown(const void *a, const void *b)
