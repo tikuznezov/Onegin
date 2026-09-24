@@ -56,9 +56,7 @@ int main(int argc, char *argv[])
     // PrintStrPointers(onegin.str_pointers, onegin.str_count, "DOWN");
 
     // original
-    Qsort(onegin.str_pointers, onegin.str_count, sizeof(StrPointers), IntCompUp);
-    PrintStrPointersToFile(onegin.str_pointers, onegin.str_count, output, "original text");
-    // PrintStrPointers(onegin.str_pointers, onegin.str_count, "ORIGINAL");
+    PrintStrArrayToFile(onegin.begin, onegin.size, output, "Original text");
 
     fclose(output);
     FreeFile(&onegin);
@@ -130,17 +128,18 @@ int PrintStrPointersToFile(StrPointers *text, size_t count_of_strings, FILE *fil
 {
     assert(text);
 
-    fprintf(file, "___________________________________________________________________\n");
     fputs((const char *) description, file);
+    fprintf(file, "\n___________________________________________________________________\n");
     fprintf(file, "\n\n");
 
     for (size_t str_n = 0; str_n < count_of_strings; str_n++)
     {
-        fprintf(file, "%5zu (str[%5zu]) ", str_n, text[str_n].str_num);
+        fprintf(file, "%5zu -> %5zu:    \"", text[str_n].str_num, str_n+1);
         size_t i = 0;
         while ((text[str_n].beg[i] != '\0') && (text[str_n].beg[i] != '\n'))
             fputc(text[str_n].beg[i++], file);
-        fputc('\n', file);
+            fputc('\"', file);
+            fputc('\n', file);
     }
 
     fprintf(file, "-------------------------------------------------------------------\n\n\n\n");
@@ -154,8 +153,8 @@ int CompareStrUp(const void *a, const void *b)
     assert(b);
 
     // printf("Comp start\n");
-    const char *pstr1 = ((StrPointers *)a)->beg;
-    const char *pstr2 = ((StrPointers *)b)->beg;
+    const char *pstr1 = ((const StrPointers *)a)->beg;
+    const char *pstr2 = ((const StrPointers *)b)->beg;
     // printf("Get elements\n a = %p \n b = %p\n", pstr1, pstr2);
     // printf("Get elements\n a[0] = %c \n b[0] = %c\n", *pstr1, *pstr2);
     // PrintStr(pstr1);
@@ -187,8 +186,8 @@ int CompareStrDown(const void *a, const void *b)
     assert(a);
     assert(b);
 
-    const char *pstr1 = ((StrPointers *)a)->end;
-    const char *pstr2 = ((StrPointers *)b)->end;
+    const char *pstr1 = ((const StrPointers *)a)->end;
+    const char *pstr2 = ((const StrPointers *)b)->end;
 
     if ((*pstr1 == '\0') || (*pstr1 == '\n') || (*pstr2 == '\0') || (*pstr2 == '\n'))
         return tolower(*pstr1) - tolower(*pstr2);
@@ -339,6 +338,8 @@ int ReadFile(char *file_name, File *file)
     return 0;
 }
 
+
+// COMP
 int FreeFile(File *file)
 {
     free(file->begin - 1);
@@ -346,5 +347,61 @@ int FreeFile(File *file)
 
     file->begin = NULL;
     file->str_pointers = NULL;
+    return 0;
+}
+
+int PrintStrArray(char **a, size_t array_length,const char *comment)
+{
+    assert(a);
+    assert(comment);
+
+    PrintStr(comment);
+    PYELLOW printf("----------------------------------------------------------------\n"); DEF_COL
+    for (size_t i = 0; i < array_length; i++)
+    {
+        putc('*', stdout);
+        putc('\t', stdout);
+        putc('"', stdout);
+
+        size_t str_index = 0;
+        while ((a[i][str_index] != '\0') && (a[i][str_index] != '\n'))
+        {
+            putc(a[i][str_index], stdout);
+            str_index++;
+        }
+
+        putc('"', stdout);
+        putc('\n', stdout);
+    }
+    PYELLOW printf("----------------------------------------------------------------\n"); DEF_COL
+
+    return 0;
+}
+
+int PrintStrArrayToFile(char *text, size_t array_length, FILE *file, const char *description)
+{
+    assert(text);
+
+    fprintf(file, "___________________________________________________________________\n");
+    fputs((const char *) description, file);
+    fprintf(file, "\n\n");
+
+    size_t index = 0;
+    size_t str_num = 0;
+
+    while (index < array_length)
+    {
+        fprintf(file, "%5zu:\t\"", ++str_num);
+        while ((text[index] != '\n') && (text[index] != '\0'))
+        {
+            fputc(text[index++], file);
+        }
+        fputc('"', file);
+        fputc('\n', file);
+        index++;
+    }
+
+    fprintf(file, "-------------------------------------------------------------------\n\n\n\n");
+
     return 0;
 }

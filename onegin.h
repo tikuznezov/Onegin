@@ -57,9 +57,15 @@ struct File
 // display strings array
 int PrintStrPointers(StrPointers *array, size_t array_length,const char *comment);
 
+int PrintStrArray(char **a, size_t array_length,const char *comment);
+
 void PrintCharArray(char *array, size_t array_length);
 
 int PrintStrPointersToFile(StrPointers *text, size_t count_of_strings, FILE *file, const char *description);
+
+int PrintStrArrayToFile(char *text, size_t count_of_strings, FILE *file, const char *description);
+
+int PrintStrArray(char **a, size_t array_length,const char *comment);
 
 void PrintStr(const char *a);
 
