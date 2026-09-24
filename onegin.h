@@ -23,6 +23,7 @@ struct StrPointers
 {
     char *beg;
     char *end;
+    size_t str_num;
 };
 
 // COMP
@@ -58,7 +59,7 @@ int PrintStrPointers(StrPointers *array, size_t array_length,const char *comment
 
 void PrintCharArray(char *array, size_t array_length);
 
-int PrintStrToFile(StrPointers *text, size_t count_of_strings, FILE *file, const char *description);
+int PrintStrPointersToFile(StrPointers *text, size_t count_of_strings, FILE *file, const char *description);
 
 void PrintStr(const char *a);
 
@@ -98,5 +99,7 @@ int SepToStr(File *file);
 /// @param file - struct to record read file 
 /// @return
 int ReadFile(char *file_name, File *file);
+
+int FreeFile(File *file);
 
 #endif

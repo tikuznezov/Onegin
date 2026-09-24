@@ -46,20 +46,22 @@ int main(int argc, char *argv[])
 
     // sort by alphabet
     Qsort(onegin.str_pointers, onegin.str_count, sizeof(StrPointers), CompareStrUp);
-    PrintStrToFile(onegin.str_pointers, onegin.str_count, output, "alphabet sort (a-z) (UP)");
+    PrintStrPointersToFile(onegin.str_pointers, onegin.str_count, output, "alphabet sort (a-z) (UP)");
     // PrintStrPointers(onegin.str_pointers, onegin.str_count, "UP");
 
 
     // reverse sort by alphabet
     Qsort(onegin.str_pointers, onegin.str_count, sizeof(StrPointers), CompareStrDown);
-    PrintStrToFile(onegin.str_pointers, onegin.str_count, output, "reverse alphabet sort (a-z) (DOWN)");
+    PrintStrPointersToFile(onegin.str_pointers, onegin.str_count, output, "reverse alphabet sort (a-z) (DOWN)");
     // PrintStrPointers(onegin.str_pointers, onegin.str_count, "DOWN");
 
     // original
     Qsort(onegin.str_pointers, onegin.str_count, sizeof(StrPointers), IntCompUp);
-    PrintStrToFile(onegin.str_pointers, onegin.str_count, output, "original text");
+    PrintStrPointersToFile(onegin.str_pointers, onegin.str_count, output, "original text");
     // PrintStrPointers(onegin.str_pointers, onegin.str_count, "ORIGINAL");
 
+    fclose(output);
+    FreeFile(&onegin);
     return 0;
 }
 
@@ -124,7 +126,7 @@ int PrintStrPointers(StrPointers *text, size_t array_length,const char *comment)
     return 0;
 }
 
-int PrintStrToFile(StrPointers *text, size_t count_of_strings, FILE *file, const char *description)
+int PrintStrPointersToFile(StrPointers *text, size_t count_of_strings, FILE *file, const char *description)
 {
     assert(text);
 
@@ -134,7 +136,7 @@ int PrintStrToFile(StrPointers *text, size_t count_of_strings, FILE *file, const
 
     for (size_t str_n = 0; str_n < count_of_strings; str_n++)
     {
-        fprintf(file, "%5zu) ", str_n);
+        fprintf(file, "%5zu (str[%5zu]) ", str_n, text[str_n].str_num);
         size_t i = 0;
         while ((text[str_n].beg[i] != '\0') && (text[str_n].beg[i] != '\n'))
             fputc(text[str_n].beg[i++], file);
@@ -275,9 +277,12 @@ int SepToStr(File *file)
     file->str_count = 0;
 
     // first string is begin of file
-    file->str_pointers[current_st_pointer_index++].beg = file->begin;
+    file->str_pointers[current_st_pointer_index].beg = file->begin;
+    // 
+    file->str_pointers[current_st_pointer_index++].str_num = 1;
     // go to next index[]
     file->str_count++;
+    
 
     while ((current_buffer_index < file->size) && (current_st_pointer_index < POINTER_ARRAY_LENGTH))
     {
@@ -285,6 +290,7 @@ int SepToStr(File *file)
         {
             file->str_pointers[current_ed_pointer_index++].end = &(file->begin)[current_buffer_index-1];
             file->str_count++;
+            file->str_pointers[current_st_pointer_index].str_num = file->str_count;
             file->str_pointers[current_st_pointer_index++].beg = &(file->begin)[++current_buffer_index];
         }
         else
@@ -330,5 +336,15 @@ int ReadFile(char *file_name, File *file)
     }
 
     close(fd);
+    return 0;
+}
+
+int FreeFile(File *file)
+{
+    free(file->begin - 1);
+    free(file->str_pointers);
+
+    file->begin = NULL;
+    file->str_pointers = NULL;
     return 0;
 }
