@@ -19,13 +19,19 @@ const size_t POINTER_ARRAY_LENGTH = 8000;
 
 const size_t MAX_STR_LENGTH       = 100;
 
+struct StrPointers
+{
+    char *beg;
+    char *end;
+};
+
 // COMP
 struct File 
 {
     size_t str_count;
     size_t size;
     char *begin;
-    char **str_pointers;
+    StrPointers *str_pointers;
 };
 
 
@@ -48,9 +54,11 @@ struct File
 
 
 // display strings array
-int  PrintStrArray(char **array, size_t array_length,const char *comment);
+int PrintStrPointers(StrPointers *array, size_t array_length,const char *comment);
 
 void PrintCharArray(char *array, size_t array_length);
+
+int PrintStrToFile(StrPointers *text, size_t count_of_strings, FILE *file, const char *description);
 
 void PrintStr(const char *a);
 
