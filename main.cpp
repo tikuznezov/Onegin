@@ -1,7 +1,6 @@
 #include "onegin.h"
+#include "fileread.cpp"
 #include "Qsort.cpp"
-
-// TODO коды ошибок
 
 int main(int argc, char *argv[]) 
 {
@@ -30,7 +29,7 @@ int main(int argc, char *argv[])
             return 1;
     }
 
-    File onegin = ReadFromFile(input_file_name);
+    File onegin = ReadSringsFromFile(input_file_name);
     FILE *output = fopen(output_file_name, "w");
     if (output == NULL)
     {
@@ -80,20 +79,6 @@ void PrintStr(const char *a)
         putc(a[i++], stdout);
     printf("<---\n");
     DEF_COL
-}
-
-File ReadFromFile(char *file_name)
-{
-    // create file struct
-    File file = {};
-
-    // read file to struct
-    ReadFile(file_name, &file);
-
-    // separate to single strings
-    SepToStr(&file);
-
-    return file;
 }
 
 int PrintStrPointers(StrPointers *text, size_t array_length,const char *comment)
@@ -239,115 +224,6 @@ int IntCompUp(const void *a, const void *b)
     assert(a);
     assert(b);
     return *(const int *)a - *(const int *)b;
-}
-
-// COMP Function to get file size
-int FileSize(char *file_name, struct stat *statistics)
-{
-    assert(file_name);
-    assert(statistics);
-
-    if (stat(file_name, statistics) == 0) 
-    {
-        printf("Размер файла: %ld байт\n", (long)statistics->st_size);
-    } 
-    else 
-    {
-        perror("Ошибка при вызове stat");
-        exit(1);
-    }
-    return 0;
-}
-
-// COMP функ для чтения без разбиения на строчки возврат структуры с размером, указателем на буфер и массивом указателей на строки
-// COMP Function to separate file to strings
-int SepToStr(File *file)
-{
-    assert(file);
-    // create strings addresses buffer
-    file->str_pointers = (StrPointers *)calloc(POINTER_ARRAY_LENGTH, sizeof(StrPointers));
-    assert(file->str_pointers);
-    // printf("pointer a is initialized\n");
-
-    // separate to strings
-    size_t current_buffer_index = 0;
-    size_t current_st_pointer_index = 0;
-    size_t current_ed_pointer_index = 0;
-    file->str_count = 0;
-
-    // first string is begin of file
-    file->str_pointers[current_st_pointer_index].beg = file->begin;
-    // 
-    file->str_pointers[current_st_pointer_index++].str_num = 1;
-    // go to next index[]
-    file->str_count++;
-    
-
-    while ((current_buffer_index < file->size) && (current_st_pointer_index < POINTER_ARRAY_LENGTH))
-    {
-        if (file->begin[current_buffer_index] == '\n' || file->begin[current_buffer_index] == '\0')
-        {
-            file->str_pointers[current_ed_pointer_index++].end = &(file->begin)[current_buffer_index-1];
-            file->str_count++;
-            file->str_pointers[current_st_pointer_index].str_num = file->str_count;
-            file->str_pointers[current_st_pointer_index++].beg = &(file->begin)[++current_buffer_index];
-        }
-        else
-            current_buffer_index++;
-    }
-
-    file->str_pointers[current_ed_pointer_index].end = &((file->begin)[current_buffer_index]);
-
-    return 0;
-}
-
-// COMP Function to read file to buffer
-int ReadFile(char *file_name, File *file)
-{
-    assert(file_name);
-    assert(file);
-    // read file and get descriptor
-    int fd = open(file_name, O_RDONLY);
-    if (fd == -1)
-    {
-        perror("File reading error"); // текстовое описание последней системной ошибки
-        exit(1);
-    }
-
-    // get file size
-    struct stat statistics = {};
-    FileSize(file_name, &statistics);
-    file->size = (size_t)statistics.st_size;
-    // printf("buffer size = %zu\n", file.size);
-
-
-    // create text buffer
-    file->begin = (char *)calloc(file->size + 2, 1) + 1;
-    assert(file->begin);
-    file->begin[-1] = '\0';
-
-    // read to text buffer
-    ssize_t count_of_read_bytes = read(fd, (void *)file->begin, file->size);
-    if (count_of_read_bytes == -1)
-    {
-        perror("Ошибка чтения данных файла\n");
-        exit(1);
-    }
-
-    close(fd);
-    return 0;
-}
-
-
-// COMP
-int FreeFile(File *file)
-{
-    free(file->begin - 1);
-    free(file->str_pointers);
-
-    file->begin = NULL;
-    file->str_pointers = NULL;
-    return 0;
 }
 
 int PrintStrArray(char **a, size_t array_length,const char *comment)

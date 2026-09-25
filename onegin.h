@@ -14,9 +14,6 @@
 #include <sys/types.h>
 #include <ctype.h>
 
-
-const size_t POINTER_ARRAY_LENGTH = 8000;
-
 const size_t MAX_STR_LENGTH       = 100;
 
 struct StrPointers
@@ -86,7 +83,7 @@ int  IntCompUp(const void *a, const void *b);
 /// @brief Read file to buffer and get file info (struct File)
 /// @param file_name name of file
 /// @return buffer with file data, array with begin of file strings, other file info
-File ReadFromFile(char *file_name);
+File ReadSringsFromFile(char *file_name);
 
 /// @brief Get file size by system call
 /// @param file_name name of file
