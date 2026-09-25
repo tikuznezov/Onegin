@@ -1,6 +1,6 @@
 #include "onegin.h"
 
-void   Swap(void *a, void *b, size_t element_size)
+void   MemcpySwap(void *a, void *b, size_t element_size)
 {
     // printf("Start SWAP\n");
     void *temp = calloc(1, element_size + 1);
@@ -9,6 +9,17 @@ void   Swap(void *a, void *b, size_t element_size)
     memcpy(b   , temp, element_size);
     free(temp);
     // printf("End SWAP\n");
+}
+
+void   Swap(void *a, void *b, size_t element_size)
+{
+    char temp = '\0';
+    for (size_t i = 0; i < element_size; i++)
+    {
+        temp          = ((char *)a)[i];
+        ((char*)a)[i] = ((char *)b)[i];
+        ((char*)b)[i] =           temp;
+    }
 }
 
 size_t Part (void *array, size_t array_length, size_t element_size, int (* Comp)(const void *a, const void *b))
